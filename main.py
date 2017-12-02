@@ -6,6 +6,7 @@ from distutils.version import LooseVersion
 import project_tests as tests
 
 
+
 # Check TensorFlow Version
 assert LooseVersion(tf.__version__) >= LooseVersion('1.0'), 'Please use TensorFlow version 1.0 or newer.  You are using {}'.format(tf.__version__)
 print('TensorFlow Version: {}'.format(tf.__version__))
@@ -63,23 +64,23 @@ def layers(vgg_layer3_out, vgg_layer4_out, vgg_layer7_out, num_classes):
     # TODO: Implement function
 
     # Vgg layer7 1x1 convolution
-    layer7_conv1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, padding="same", kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    layer7_conv1x1 = tf.layers.conv2d(vgg_layer7_out, num_classes, 1, padding="same", kernel_initializer= tf.random_normal_initializer(stddev=0.01), kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
     # Vgg layer7 upsampling
-    layer7_output = tf.layers.conv2d_transpose(layer7_conv1x1, num_classes, 4, strides=(2, 2), padding="same", kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    layer7_output = tf.layers.conv2d_transpose(layer7_conv1x1, num_classes, 4, strides=(2, 2), padding="same", kernel_initializer= tf.random_normal_initializer(stddev=0.01), kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # Vgg layer4 1x1 convolution
-    layer4_conv1x1 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, padding="same", kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    layer4_conv1x1 = tf.layers.conv2d(vgg_layer4_out, num_classes, 1, padding="same", kernel_initializer= tf.random_normal_initializer(stddev=0.01), kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
     # Vgg layer4 skip connection
     layer4_input = tf.add(layer7_output, layer4_conv1x1)
     # Vgg layer4 upsampling
-    layer4_output = tf.layers.conv2d_transpose(layer4_input, num_classes, 4, strides=(2, 2), padding="same", kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    layer4_output = tf.layers.conv2d_transpose(layer4_input, num_classes, 4, strides=(2, 2), padding="same", kernel_initializer= tf.random_normal_initializer(stddev=0.01), kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
     # Vgg layer3 1x1 convolution
-    layer3_conv1x1 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, padding="same", kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    layer3_conv1x1 = tf.layers.conv2d(vgg_layer3_out, num_classes, 1, padding="same", kernel_initializer= tf.random_normal_initializer(stddev=0.01), kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
     # Vgg layer3 skip connection
     layer3_input = tf.add(layer4_output, layer3_conv1x1)
     # Vgg layer3 upsampling
-    final_output = tf.layers.conv2d_transpose(layer3_input, num_classes, 16, strides=(8, 8), padding="same", kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
+    final_output = tf.layers.conv2d_transpose(layer3_input, num_classes, 16, strides=(8, 8), padding="same", kernel_initializer= tf.random_normal_initializer(stddev=0.01), kernel_regularizer=tf.contrib.layers.l2_regularizer(1e-3))
 
 
 
@@ -129,11 +130,12 @@ def train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_l
     :param learning_rate: TF Placeholder for learning rate
     """
     # TODO: Implement function
+    sess.run(tf.global_variables_initializer())
 
     for i in range(epochs):
     	print("Epoch: {}".format(i+1))
     	for image, label in get_batches_fn(batch_size):
-    		loss = sess.run(cross_entropy_loss, feed_dict={input_image: image, correct_label: label, keep_prob: 0.5})
+    		loss = sess.run(cross_entropy_loss, feed_dict={input_image: image, correct_label: label, keep_prob: 0.5, learning_rate: 0.001})
     		print("Loss: = {:.3f}".format(loss))
     print()
 tests.test_train_nn(train_nn)
@@ -164,10 +166,11 @@ def run():
 
 		# TODO: Build NN using load_vgg, layers, and optimize function
 
-		sess.run(tf.global_variables_initializer())
+		#sess.run(tf.global_variables_initializer())
 
 		correct_label = tf.placeholder(tf.float32, [None, None, None, num_classes])
-		learning_rate = tf.placeholder(tf.float32)
+		learning_rate = tf.placeholder(tf.float32, name='learning_rate')
+		#learning_rate = 0.001
 
 		input_image, keep_prob, layer3_out, layer4_out, layer7_out = load_vgg(sess, vgg_path)
 		nn_last_layer = layers(layer3_out, layer4_out, layer7_out, num_classes)
@@ -176,7 +179,7 @@ def run():
 		# TODO: Train NN using the train_nn function
 		print("Start Training...")
 		print()
-		epochs = 10
+		epochs = 50
 		batch_size = 5
 		train_nn(sess, epochs, batch_size, get_batches_fn, train_op, cross_entropy_loss, input_image, correct_label, keep_prob, learning_rate)
 
