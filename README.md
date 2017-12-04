@@ -19,6 +19,7 @@ The goal of this project is to label/identify the pixels of a road images using 
 1. Vgg layer3 1x1 convolution: Vgg layer3 as input, number of classes=2, padding as same, kernel size=1.
 1. Vgg layer3 skip connection: Add layer4 output from step-5 and layer3_conv1x1 from step-6 to the tensorflow.
 1. Final output layer = Vgg layer3 upsampling(transposed convolution): Vgg layer3 as input from step-7, number of classes=2, padding as same, kernel size=16 with strides(8,8).
+
 **Important** *In each of the above convolution and transposed convolution, kerner initializer and kerner regularizer is used for better network classification.*
 
 ##### Optimize the Network
