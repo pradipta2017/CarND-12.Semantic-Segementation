@@ -31,9 +31,9 @@ The goal of this project is to label/identify the pixels of a road images using 
 1. Download the pre-trained **VGG-16** network.
 1. Load the Fully Convolution layers with optimizer.
 1. Run the network with below hyper-parameters:
-	- Epochs=40
+	- Epochs=20
 	- batch size=2
-	- learning rate=0.0005
+	- learning rate=0.00001
 
 
 
